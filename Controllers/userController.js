@@ -26,3 +26,30 @@ export const create_user = asyncHandler(async (req,res) =>{
     }
 
 })
+
+
+export const login_user = asyncHandler(async (req,res) =>{
+    try {
+        const {email, password} = req.body;
+
+        if(!email || !password){
+            res.status(400).json({message:"All fields are mandatory..!!"})
+        }
+
+        const user = await User.findOne({email}).select('+password');
+        if(!user){
+            res.status(400).json({message:"User does not exist..!!"})
+        }
+
+        const isPassword = await bcrypt.compare(password, user?.password);
+        if(!isPassword){
+            res.status(400).json({message:"Invalid credentials..!!"})
+        }
+
+        res.status(200).json({message:"User logged in successfully", user});
+        
+    } catch (error) {
+        res.status(500).json({message:error.message});
+    }
+})
+
